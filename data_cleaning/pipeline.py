@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 pd.set_option('display.max_columns', None)
 print("Bibliotheken importiert")
 
-df = pd.read_csv('/Users/milenka/Desktop/PycharmProjects/PythonProject1/data/GoodReads_100k_books.csv')
+df = pd.read_csv('../data/GoodReads_100k_books.csv')
 df_clean = df.copy()
 print(f"Geladen: {df.shape[0]} Zeilen, {df.shape[1]} Spalten")
 
 #Ueberblick über die Daten
-important = ['author', 'title', 'genre', 'rating', 'reviews', 'totalratings']
+important = ['author', 'title', 'genre', 'rating', 'isbn', 'totalratings']
 
 #Tabellenansicht
 pd.set_option('display.max_columns', None)
@@ -21,6 +21,10 @@ print("\nWichtige Spalten:")
 print(df[important].head())
 print("\nBewertungen-Beispiele:")
 print(df['rating'].head(5))
+
+# Nicht relevante Spalten entfernen
+df_clean = df_clean[['author', 'title', 'genre', 'rating', 'isbn', 'totalratings']]
+print(f"Spalten nach entfernung: {df_clean.columns.tolist()}")
 
 #Unlesbare Daten
 broken_titles = df[
@@ -41,20 +45,16 @@ numbered_author = df[
 ]
 
 # Vorher
-before_cleaning = df_clean.shape[0]
-print(f"Vor den löschen der unlesbaren daten: {before_cleaning} Zeilen")
+before = df_clean.shape[0]
 
 df_clean = df_clean.drop(index=broken_titles.index, errors='ignore')
 df_clean = df_clean.drop(index=broken_author.index, errors='ignore')
 df_clean = df_clean.drop(index=numbered_title.index, errors='ignore')
 df_clean = df_clean.drop(index=numbered_author.index, errors='ignore')
 
-after_cleaning =  df_clean.shape[0]
-print(f"{after_cleaning - before_cleaning} Zeilen")
-print(f"  davon unleserliche Titel: {len(broken_titles)}")
-print(f"  davon unleserliche Autoren: {len(broken_author)}")
-print(f"  davon Zahlen-Titel: {len(numbered_title)}")
-print(f"  davon Zahlen-Autoren: {len(numbered_author)}")
+print(f"Vorher: {before} Zeilen")
+print(f"Nachher: {df_clean.shape[0]} Zeilen")
+print(f"Gelöscht: {before - df_clean.shape[0]} Zeilen")
 
 #Fehlende Werte identifizieren
 missing = df_clean[important].isnull().sum()
@@ -68,41 +68,32 @@ missing_df = pd.DataFrame({
 missing_df = missing_df[missing_df['Fehlend'] > 0]
 print(missing_df)
 
-before = df_clean.shape[0]
-
 df_clean = df_clean.dropna(subset=['title'])
 df_clean = df_clean.dropna(subset=['genre'])
+df_clean = df_clean.dropna(subset=['isbn'])
 
-after = df_clean.shape[0]
-print(f"Gelöscht: {before - after} fehlenden Werte")
+print(f"{df_clean.shape[0]} Zeilen")
 
 #Duplikate
 dups = df_clean.duplicated(subset=['isbn']).sum()
 print(f"Duplikate: {dups}")
 df_clean.drop_duplicates(subset=['isbn'], inplace=True)
-print(f"Nach Entfernung der Duplikate: {df_clean.shape[0]} Zeilen")
-
-# Ausreißer behandeln
-df_clean = df_clean[df_clean['rating'] > 0]
-df_clean = df_clean[df_clean['rating'] <= 5]
-print(f"Nach Rating-Bereinigung: {df_clean.shape[0]} Zeilen")
 
 # Ausreißer mit IQR
-for col in ['reviews', 'totalratings']:
+for col in ['rating', 'totalratings']:
     Q1 = df_clean[col].quantile(0.25)
     Q3 = df_clean[col].quantile(0.75)
     IQR = Q3 - Q1
     lower_bound = Q1 - 1.5 * IQR
     upper_bound = Q3 + 1.5 * IQR
     outliers = df_clean[(df_clean[col] < lower_bound) | (df_clean[col] > upper_bound)]
-    print(f"{col}: {len(outliers)} Ausreißer behalten, da populäre Bücher realistisch hohe und viele Bewertungen haben")
+    print(f"{col}: {len(outliers)}")
 
 # Ausreißer entfernen rating unter/gleich 0 und über 5
 lower_bound = 0
 upper_bound = 5
 
 df_clean = df_clean[(df_clean['rating'] > lower_bound) & (df_clean['rating'] <= upper_bound)]
-print(f"Nach Rating-Bereinigung: {df_clean.shape[0]} Zeilen")
 
 # Rating Statistiken und Visualisierung
 print("Rating-Statistiken:")
@@ -120,17 +111,32 @@ axes[1].boxplot(df_clean['rating'].dropna())
 axes[1].set_title('Ratings ohne 0')
 axes[1].set_ylim(-0.5, 5.5)
 
+plt.savefig('rating_boxplot.png', dpi=150, bbox_inches='tight')
 plt.show()
 
-categorical_cols = ['author', 'genre', 'title']
+# Inkonsistenzen beheben
+categorical_cols = ['author', 'title']
 
 for col in categorical_cols:
     print(f"\n{col}:")
     print(df_clean[col].value_counts().head(5))
 
-# Inkonsistenzen beheben
 df_clean['author'] = df_clean['author'].str.strip().str.title()
-df_clean['genre'] = df_clean['genre'].str.strip().str.title()
+df_clean['title'] = df_clean['title'].str.strip()
 
-print("\nNach Bereinigung:")
-print(df_clean[['author', 'genre', 'title']].head())
+# Finale Überprüfung
+print("Finale Dimensionen:")
+print(df_clean.shape)
+
+print("\nFehlende Werte:")
+print(df_clean.isnull().sum())
+
+print("\nDatentypen:")
+print(df_clean.dtypes)
+
+print("\nErste Zeilen des bereinigten Datensatzes:")
+print(df_clean.head())
+
+#Speichern
+df_clean.to_csv('GoodReads_clean.csv', index=False)
+print("Bereinigter Datensatz wurde gespeichert!")
