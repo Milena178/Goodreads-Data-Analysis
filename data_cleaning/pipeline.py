@@ -1,9 +1,7 @@
 #Datei einlesen
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-pd.set_option('display.max_columns', None)
 print("Bibliotheken importiert")
 
 df = pd.read_csv('../data/GoodReads_100k_books.csv')
@@ -80,14 +78,13 @@ print(f"Duplikate: {dups}")
 df_clean.drop_duplicates(subset=['isbn'], inplace=True)
 
 # Ausreißer mit IQR
-for col in ['rating', 'totalratings']:
-    Q1 = df_clean[col].quantile(0.25)
-    Q3 = df_clean[col].quantile(0.75)
-    IQR = Q3 - Q1
-    lower_bound = Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
-    outliers = df_clean[(df_clean[col] < lower_bound) | (df_clean[col] > upper_bound)]
-    print(f"{col}: {len(outliers)}")
+Q1 = df_clean['rating'].quantile(0.25)
+Q3 = df_clean['rating'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+outliers = df_clean[(df_clean['rating'] < lower_bound) | (df_clean['rating'] > upper_bound)]
+print(f"rating: {len(outliers)}")
 
 # Ausreißer entfernen rating unter/gleich 0 und über 5
 lower_bound = 0
@@ -140,3 +137,6 @@ print(df_clean.head())
 #Speichern
 df_clean.to_csv('GoodReads_clean.csv', index=False)
 print("Bereinigter Datensatz wurde gespeichert!")
+
+
+#print(df_clean['genre'].value_counts().head(5))
