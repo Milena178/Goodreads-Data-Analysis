@@ -24,8 +24,6 @@ df_clean['ist_genrewechsel']  = df_clean['buch_genre'] != df_clean['stammgenre_a
 def zaehle_stammgenre_buecher(buecher_status):
     return (buecher_status == False).sum()
 
-print("Top 15 Autoren nach Buchanzahl")
-
 autoren_uebersicht = df_clean.groupby('author').agg(
     gesamt_buecher          = ('title', 'count'),
     hauptgenre              = ('stammgenre_autor', 'first'),
@@ -33,6 +31,7 @@ autoren_uebersicht = df_clean.groupby('author').agg(
     anzahl_wechsel_buecher    = ('ist_genrewechsel', 'sum'),
 ).reset_index()
 
+print("Top 15 Autoren nach Buchanzahl")
 print(autoren_uebersicht.sort_values('gesamt_buecher', ascending=False).head(15).to_string(index=False))
 
 # Nur Autoren mit mind. einem Genrewechsel filtern
