@@ -62,8 +62,8 @@ st.markdown('---')
 
 
 # KENNZAHLEN
-anzahl_besser     = (results['Differenz'] > 0).sum()
-anzahl_schlechter = (results['Differenz'] < 0).sum()
+anzahl_besser     = (results['differenz'] > 0).sum()
+anzahl_schlechter = (results['differenz'] < 0).sum()
 gesamt            = len(results)
 
 col1, col2, col3, col4 = st.columns(4)
@@ -91,7 +91,7 @@ st.image('src/figures/plot2_differenz_uebersicht.png')
 st.markdown(f"""
 > Das Histogramm zeigt die Differenz pro Autor.
 > Die rote Linie ist der Nullpunkt und  rechts davon war der Wechsel besser.
-> Durchschnittliche Differenz: **{results['Differenz'].mean():+.3f}**
+> Durchschnittliche Differenz: **{results['differenz'].mean():+.3f}**
 """)
 st.markdown('---')
 
@@ -127,4 +127,4 @@ with tab1:
     st.dataframe(df.head(50))
 
 with tab2:
-    st.dataframe(results.sort_values('Differenz', ascending=False))
+    st.dataframe(results.sort_values('differenz', ascending=False))

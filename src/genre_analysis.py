@@ -24,6 +24,7 @@ df_clean['ist_genrewechsel']  = df_clean['buch_genre'] != df_clean['stammgenre_a
 def zaehle_stammgenre_buecher(buecher_status):
     return (buecher_status == False).sum()
 
+#group um mehrere zeilen zu einem zusammenfassen
 autoren_uebersicht = df_clean.groupby('author').agg(
     gesamt_buecher          = ('title', 'count'),
     hauptgenre              = ('stammgenre_autor', 'first'),
@@ -44,11 +45,13 @@ print(f"\nAutoren mit mind. 1 Genre-Wechsel: {len(autoren_mit_wechsel)}")
 rating_stammgenre = df_wechsel_autoren[df_wechsel_autoren['ist_genrewechsel'] == False].groupby('author')['rating'].mean()
 rating_wechsel    = df_wechsel_autoren[df_wechsel_autoren['ist_genrewechsel'] == True].groupby('author')['rating'].mean()
 
+#baut gemeinsame tabelle
 bewertungs_vergleich = pd.DataFrame({
     'durchschnitt_stammgenre': rating_stammgenre,
     'durchschnitt_wechsel':    rating_wechsel
 })
 
+#Differenz berechnung
 bewertungs_vergleich['differenz'] = bewertungs_vergleich['durchschnitt_wechsel'] - bewertungs_vergleich['durchschnitt_stammgenre']
 
 print("BEWERTUNGSVERGLEICH PRO AUTOR")
@@ -80,7 +83,7 @@ wechsel_kombinationen = wechsel_kombinationen.sort_values('anzahl_buecher', asce
 
 print(wechsel_kombinationen.head(20).to_string(index=False))
 
-df_clean.to_csv("genre_switch_results.csv", index=False)
+bewertungs_vergleich.reset_index().to_csv("genre_switch_results.csv", index=False)
 
 # VISUALISIERUNG
 os.makedirs("figures", exist_ok=True)
