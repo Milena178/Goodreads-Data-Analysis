@@ -14,11 +14,11 @@ def finde_haeufigstes_genre(genres_des_autors):
     return genres_des_autors.value_counts().idxmax()
 
 # Spalten für die Analyse vorbereiten
-df_clean['buch_genre'] = df_clean['genre'].apply(extrahiere_erstes_genre)
+df_clean['buch_genre'] = df_clean['genre'].apply(extrahiere_erstes_genre) #auf jeden einzelnen wert funtion einsetzen
 
-stammgenre_verzeichnis = df_clean.groupby('author')['buch_genre'].agg(finde_haeufigstes_genre)
-df_clean['stammgenre_autor'] = df_clean['author'].map(stammgenre_verzeichnis)
-df_clean['ist_genrewechsel']  = df_clean['buch_genre'] != df_clean['stammgenre_autor']
+stammgenre_verzeichnis = df_clean.groupby('author')['buch_genre'].agg(finde_haeufigstes_genre) # alle bücher vom author zusammmenfassen auf einen Wet
+df_clean['stammgenre_autor'] = df_clean['author'].map(stammgenre_verzeichnis) # welches Stammgenre gehört zu dem author
+df_clean['ist_genrewechsel']  = df_clean['buch_genre'] != df_clean['stammgenre_autor'] #ob gewechselt ist
 
 # Hilfsfunktion für den Überblick pro Autor
 def zaehle_stammgenre_buecher(buecher_status):
@@ -81,6 +81,7 @@ wechsel_kombinationen = wechsel_kombinationen.sort_values('anzahl_buecher', asce
 
 print(wechsel_kombinationen.head(20).to_string(index=False))
 
+df_clean.to_csv("genre_switch_results.csv", index=False)
 
 # VISUALISIERUNG
 os.makedirs("figures", exist_ok=True)
