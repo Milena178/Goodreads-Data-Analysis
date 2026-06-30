@@ -35,7 +35,7 @@ autoren_uebersicht = df_clean.groupby('author').agg(
 
 print(autoren_uebersicht.sort_values('gesamt_buecher', ascending=False).head(15).to_string(index=False))
 
-# Nur Autoren mit einem Genre-Wechsel filtern
+# Nur Autoren mit mind. einem Genrewechsel filtern
 autoren_mit_wechsel = autoren_uebersicht[autoren_uebersicht['anzahl_wechsel_buecher'] >= 1]['author']
 df_wechsel_autoren = df_clean[df_clean['author'].isin(autoren_mit_wechsel)]
 

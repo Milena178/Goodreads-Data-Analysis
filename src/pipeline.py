@@ -25,6 +25,7 @@ df_clean = df_clean[['author', 'title', 'genre', 'rating', 'isbn', 'isbn13', 'to
 print(f"Spalten nach entfernung: {df_clean.columns.tolist()}")
 
 #DATENTYPEN UEBEPRUFEN
+print(f"Datentypen überfprüfen:")
 print(f"Author: {df['author'].dtype}")
 print(f"Titel: {df['title'].dtype}")
 print(f"Genre: {df['genre'].dtype}")
@@ -59,6 +60,8 @@ df_clean = df_clean.drop(index=broken_author.index, errors='ignore')
 df_clean = df_clean.drop(index=numbered_title.index, errors='ignore')
 df_clean = df_clean.drop(index=numbered_author.index, errors='ignore')
 
+print(f"Beispiel: {(broken_titles[['title', 'author']].head(3))}")
+
 print(f"Vorher: {before} Zeilen")
 print(f"Nachher: {df_clean.shape[0]} Zeilen")
 print(f"Gelöscht: {before - df_clean.shape[0]} Zeilen")
@@ -89,12 +92,9 @@ print(f"Nach Entfernung: {df_clean.shape[0]} Zeilen")
 rating_low = 1
 rating_high = 5
 
-#NaN Werte betrachten
-print(f"NaN Werte: {df_clean['rating'].isna().sum()}")
-
 #Bewertungen 0 und über 5 und weniger als 10 Bewertungen löschen
 df_clean = df_clean[(df_clean['rating'] >= rating_low) & (df_clean['rating'] <= rating_high) & (df_clean['totalratings'] >= 10)]
-print(f"Nach Entfernung: {df_clean.shape[0]} Zeilen")
+print(f"Nach Entfernung von Bewertungen unter 1 und über 5 : {df_clean.shape[0]} Zeilen")
 
 # Autoren mit weniger als 5 Büchern rausfiltern
 author_counts = df_clean['author'].value_counts()
@@ -105,7 +105,6 @@ print(f"Nach Autor-Filter (mind. 5 Bücher): {df_clean.shape[0]} Zeilen\n")
 categorical_cols = ['author', 'title']
 
 for col in categorical_cols:
-    print(f"\n{col}:")
     print(df_clean[col].value_counts().head(5))
 
 df_clean['author'] = df_clean['author'].str.strip().str.title()
